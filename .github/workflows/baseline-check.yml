@@ -28,17 +28,18 @@ jobs:
         id: scan
         run: |
           echo "🔎 Running feature scan..."
-          node -e "import('./index.js').then(m => m.run()).then(res => console.log(JSON.stringify(res)))" > scan-result.json
+          # Run index.js; stdout contains only JSON, stderr has human logs
+          node index.js > scan-result.json 2> >(tee scan-log.txt >&2)
+          # Read JSON and set as output for later steps
           SCAN_RESULT=$(cat scan-result.json | jq -c .)
           echo "scan-result=$SCAN_RESULT" >> $GITHUB_OUTPUT
 
-      # 5️⃣ Post PR Comment (uses our improved script)
+      # 5️⃣ Post PR Comment
       - name: Post PR Comment
         run: |
           node post-pr-comment.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # 👇 Pass the scan results to the script
           INPUT_GITHUB-TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INPUT_SCAN-RESULTS: ${{ steps.scan.outputs.scan-result }}
 
