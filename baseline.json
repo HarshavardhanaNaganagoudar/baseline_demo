@@ -1,0 +1,9 @@
+{
+  "console": { "baseline": true },
+  "object": { "baseline": true },
+  "array": { "baseline": true },
+  "map": { "baseline": true },
+  "set": { "baseline": true },
+  "promise": { "baseline": true },
+  "filter": { "baseline": true }
+}

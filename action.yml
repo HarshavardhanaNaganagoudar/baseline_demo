@@ -1,0 +1,36 @@
+name: "Baseline CI Guard"
+description: "Scan repository for web platform features and report Baseline support in PRs"
+
+# Inputs
+inputs:
+  github-token:
+    description: "GitHub token for posting PR comments"
+    required: true
+  patterns:
+    description: "Comma-separated glob patterns to scan (JS/TS/CSS/HTML)"
+    required: false
+    default: "**/*.{js,ts,jsx,tsx,html,css}"
+  fail-on-limited:
+    description: "Fail the workflow if any feature has baseline: false"
+    required: false
+    default: "true"
+  critical-features:
+    description: "Optional comma-separated list of feature IDs to treat as critical (always fail)"
+    required: false
+    default: ""
+
+# Outputs
+outputs:
+  ok:
+    description: "Indicates whether the scan passed (true/false)"
+  details:
+    description: "JSON array with detected feature details"
+
+# Runtime
+runs:
+  using: "node16"
+  main: "index.js"
+
+branding:
+  color: "blue"
+  icon: "shield"

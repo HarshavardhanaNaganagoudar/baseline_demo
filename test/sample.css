@@ -1,0 +1,2 @@
+/* test/sample.css */
+.foo:has(.bar) { color: red; }
