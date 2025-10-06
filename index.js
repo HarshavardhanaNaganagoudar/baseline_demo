@@ -147,7 +147,7 @@ async function run({
   }
   const features = Array.from(merged.values());
 
-  console.log(`🔎 Scanning ${patternsArr.join(', ')} — ${features.length} features loaded`);
+  console.error(`🔎 Scanning ${patternsArr.join(', ')} — ${features.length} features loaded`);
 
   const files = await fg(patternsArr, { cwd, dot: true, ignore: ['node_modules/**', '.git/**'] });
   const report = new Map();
@@ -191,19 +191,19 @@ async function run({
     console.warn('⚠️ Failed to set GitHub Actions outputs', err);
   }
 
-  // CLI logging
+  // CLI logging — go to stderr only
   if (report.size === 0) {
-    console.log('✅ No matches found.');
+    console.error('✅ No matches found.');
   } else {
-    console.log('🚨 Detected feature usages:');
+    console.error('🚨 Detected feature usages:');
     for (const [id, entry] of report.entries()) {
-      console.log(
+      console.error(
         `- ${id} (${entry.feature.name}) — baseline: ${entry.feature.baseline} — used in ${entry.files.size} file(s)`
       );
-      Array.from(entry.files).slice(0, 5).forEach((f) => console.log(`   • ${f}`));
+      Array.from(entry.files).slice(0, 5).forEach((f) => console.error(`   • ${f}`));
     }
     if (criticalDetected.length > 0) {
-      console.log(`⚠️ Critical features detected: ${criticalDetected.map(f => f.id).join(', ')}`);
+      console.error(`⚠️ Critical features detected: ${criticalDetected.map(f => f.id).join(', ')}`);
     }
   }
 
@@ -219,13 +219,11 @@ if (process.argv[1] && process.argv[1].endsWith('index.js')) {
       const criticalFeatures = criticalInput.split(',').map(f => f.trim()).filter(Boolean);
 
       const res = await run({ failOnLimited, criticalFeatures });
-      if (!res.ok) {
-        console.error('❌ One or more unsafe or critical features detected.');
-        process.exit(1);
-      } else {
-        console.log('✅ Scan completed: no unsafe or critical features found.');
-        process.exit(0);
-      }
+
+      // ✅ Print JSON only to stdout for GitHub Actions
+      console.log(JSON.stringify(res));
+
+      process.exit(res.ok ? 0 : 1);
     } catch (err) {
       console.error(err);
       process.exit(2);
