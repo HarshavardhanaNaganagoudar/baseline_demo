@@ -148,4 +148,13 @@ jobs:
         run: echo "✅ Testing mode: skipping fail step."
 
 ```
+---
 
+### Production Mode (fail PRs with unsafe features)
+
+```yaml
+# same as above until Post PR Comment step
+      - name: Fail on Unsafe Features
+        if: ${{ fromJSON(steps.scan.outputs.scan-result).ok == false }}
+        run: exit 1
+```
